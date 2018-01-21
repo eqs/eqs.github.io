@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Satoshi Murashige</title>
+    <link>https://eqs.github.io/post/</link>
+    <description>Recent content in Posts on Satoshi Murashige</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy; 2018 Satoshi Murashige</copyright>
+    <lastBuildDate>Sun, 01 Jan 2017 00:00:00 +0900</lastBuildDate>
+    <atom:link href="/post/" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>このブログについて</title>
+      <link>https://eqs.github.io/post/first-post/</link>
+      <pubDate>Sun, 21 Jan 2018 00:30:56 +0900</pubDate>
+      
+      <guid>https://eqs.github.io/post/first-post/</guid>
+      <description>&lt;p&gt;このブログでは開発で得た知識や技術に関するメモを書いていきます．&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
