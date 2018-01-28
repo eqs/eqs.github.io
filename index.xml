@@ -11,6 +11,324 @@
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Open Sound ControlでPythonとProcessing間の連携をやってみた</title>
+      <link>https://eqs.github.io/post/python-osc/</link>
+      <pubDate>Sun, 28 Jan 2018 15:41:50 +0900</pubDate>
+      
+      <guid>https://eqs.github.io/post/python-osc/</guid>
+      <description>&lt;p&gt;メディアアート開発の際，
+OpenCV for Pythonを用いた画像解析で映像から情報を抽出し，
+Processingで作った映像にその情報を反映したいというようなシチュエーションがある．
+OpenCVならProcessingにもライブラリはあるが，
+画像解析に関する試行錯誤はJupyter NotebookやSpyder IDEのあるPythonの方がやりやすい．
+そこで，PythonとProcessingの両方の良いところを活かすために
+Open Sound Control (OSC) による両者の連携を実装してみる．&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;環境&#34;&gt;環境&lt;/h1&gt;
+
+&lt;p&gt;この記事で使うPythonとProcessingの環境は以下の通り．&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Python 3.6.3 (Anaconda)&lt;/li&gt;
+&lt;li&gt;Processing 3.3.6&lt;/li&gt;
+&lt;li&gt;OpenCV 3.3.0&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;open-sound-control-osc&#34;&gt;Open Sound Control (OSC)&lt;/h1&gt;
+
+&lt;p&gt;OSCに関する説明は以下の記事が非常にわかりやすい．&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Processing Libraries 3 : oscP5 – OSCによるアプリケーション間通信 | yoppa.org&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://yoppa.org/sfc_design16/7927.html&#34; target=&#34;_blank&#34;&gt;http://yoppa.org/sfc_design16/7927.html&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;oscp5-processingでoscを扱えるようにするライブラリ&#34;&gt;&lt;code&gt;oscP5&lt;/code&gt; : ProcessingでOSCを扱えるようにするライブラリ&lt;/h2&gt;
+
+&lt;p&gt;Processingでは&lt;code&gt;oscP5&lt;/code&gt; (&lt;a href=&#34;https://github.com/sojamo/oscp5)というライブラリをインストールすることでOSCを使うことができる．&#34; target=&#34;_blank&#34;&gt;https://github.com/sojamo/oscp5)というライブラリをインストールすることでOSCを使うことができる．&lt;/a&gt;
+oscP5は以下のようにContribution Managerからインストール可能である．
+この記事ではバージョン&lt;code&gt;0.9.9&lt;/code&gt;のものを用いた．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/python-osc/Contrib.png&#34; alt=&#34;Contribution Manager&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;python-osc-pythonでoscを扱えるようにするモジュール&#34;&gt;&lt;code&gt;python-osc&lt;/code&gt; : PythonでOSCを扱えるようにするモジュール&lt;/h2&gt;
+
+&lt;p&gt;Pythonでは&lt;code&gt;python-osc&lt;/code&gt; (&lt;a href=&#34;https://github.com/attwad/python-osc&#34; target=&#34;_blank&#34;&gt;https://github.com/attwad/python-osc&lt;/a&gt;) というモジュールをインストールすれば使うことができる．
+インストールは下記のようにpipコマンドで出来る．
+この記事ではバージョン&lt;code&gt;1.6.4&lt;/code&gt;のものを用いた．&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;pip install python-osc
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;まずは簡単な命令の送受信を試す&#34;&gt;まずは簡単な命令の送受信を試す&lt;/h1&gt;
+
+&lt;p&gt;通信ができないことには画像解析との連携は無理なので，
+まずは簡単な命令のやりとりをPythonだけで作ってみる（まだProcessingは使わない）．&lt;/p&gt;
+
+&lt;p&gt;例として，クライアントからRGB形式で表した色の情報をサーバで受信し，その内容をコンソールに表示してみる．
+クライアント側とサーバ側のプログラムはそれぞれ以下のようになる：&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;クライアント側&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*- coding: utf-8 -*-
+from pythonosc import udp_client
+from pythonosc.osc_message_builder import OscMessageBuilder
+
+IP = &#39;127.0.0.1&#39;
+PORT = 6700
+
+# UDPのクライアントを作る
+client = udp_client.UDPClient(IP, PORT)
+
+# /colorに送信するメッセージを作って送信する
+msg = OscMessageBuilder(address=&#39;/color&#39;)
+msg.add_arg(0)
+msg.add_arg(228)
+msg.add_arg(123)
+m = msg.build()
+
+client.send(m)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;サーバ側&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*- coding: utf-8 -*-
+from pythonosc import osc_server
+from pythonosc.dispatcher import Dispatcher
+
+def color_handler(unused_addr, red, green, blue):
+    &amp;quot;&amp;quot;&amp;quot; 値を受信したときに行う処理 &amp;quot;&amp;quot;&amp;quot;
+    print(f&#39;received color : ({red}, {green}, {blue})&#39;)
+
+IP = &#39;127.0.0.1&#39;
+PORT = 6700
+
+# URLにコールバック関数を割り当てる
+dispatcher = Dispatcher()
+dispatcher.map(&#39;/color&#39;, color_handler)
+
+# サーバを起動する
+server = osc_server.ThreadingOSCUDPServer((IP, PORT), dispatcher)
+print(f&#39;Serving on {server.server_address}&#39;)
+server.serve_forever()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;processingでoscによる通信を受け取る&#34;&gt;ProcessingでOSCによる通信を受け取る&lt;/h1&gt;
+
+&lt;h2 id=&#34;受信した色をウインドウの色に反映する&#34;&gt;受信した色をウインドウの色に反映する&lt;/h2&gt;
+
+&lt;p&gt;次に受信側のプログラムをProcessingで書いてやる．
+受信したテキストをただコンソールに垂れ流すだけでは面白くないので，ウインドウの背景を受信した色に変更するようにしてみる．&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;ProcessingでOSCによる通信を受信するプログラム&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-processing&#34;&gt;import netP5.*;
+import oscP5.*;
+
+OscP5 osc;
+color bg;
+
+void setup() {
+  size(400, 400);
+  // OSCの初期化 (受信ポートは6700に設定する)
+  osc = new OscP5(this, 6700);
+  // デフォルトの背景を白にしておく
+  bg = color(255, 255, 255);
+}
+
+void draw() {
+  background(bg);
+}
+
+void oscEvent(OscMessage msg) {
+  // アドレス /color に色を受信したら，それを背景に設定する
+  if (msg.checkAddrPattern(&amp;quot;/color&amp;quot;)) {
+    int r = msg.get(0).intValue();
+    int g = msg.get(1).intValue();
+    int b = msg.get(2).intValue();
+    bg = color(r, g, b);
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ここで，送信側のPythonのプログラムには特に変更は無いが，送信先のポート番号は受信側のポート番号と揃えておくこと．&lt;/p&gt;
+
+&lt;p&gt;以下の画像が受信の結果．ウインドウの背景が色 (0, 228, 123) になってる．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/python-osc/result1.png&#34; alt=&#34;send color 1&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;ランダムな色を送信する&#34;&gt;ランダムな色を送信する&lt;/h2&gt;
+
+&lt;p&gt;送信側のプログラムを改造して，ランダムな色をたくさん送りつけるようにする．&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Pythonでランダムに色を送信するプログラム&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*- coding: utf-8 -*-
+import random
+import time
+from pythonosc import udp_client
+from pythonosc.osc_message_builder import OscMessageBuilder
+
+IP = &#39;127.0.0.1&#39;
+PORT = 6700
+
+# UDPのクライアントを作る
+client = udp_client.UDPClient(IP, PORT)
+
+for k in range(10):
+    msg = OscMessageBuilder(address=&#39;/color&#39;)
+    msg.add_arg(random.randint(0, 255))
+    msg.add_arg(random.randint(0, 255))
+    msg.add_arg(random.randint(0, 255))
+    m = msg.build()
+
+    print(m.address, m.params)
+    client.send(m)
+
+    time.sleep(0.5)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;実行結果は以下の通り．左側がProcessingのウインドウで右側がPythonのコンソールである．
+0.5秒間隔でランダムに送信した色がProcessing側に反映されていることがわかる．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/python-osc/result2.gif&#34; alt=&#34;send color 2&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;画像解析とアートを組み合わせる例-pythonで計算した色ヒストグラムの情報をprocessingで作ったアートに反映する&#34;&gt;画像解析とアートを組み合わせる例：Pythonで計算した色ヒストグラムの情報をProcessingで作ったアートに反映する&lt;/h1&gt;
+
+&lt;p&gt;OSCをPythonとProcessingで扱うサンプルをみてきたので，いよいよ本題の画像解析との連携を行う．
+あまり複雑な問題にすると記事が長くなりそうなので簡単な画像解析の例として，
+&lt;strong&gt;カメラの映像に入ってきた物体の色を取得してProcessing側に送信する&lt;/strong&gt;タスクを考える．&lt;/p&gt;
+
+&lt;h2 id=&#34;とりあえずカメラの映像を取得する&#34;&gt;とりあえずカメラの映像を取得する&lt;/h2&gt;
+
+&lt;p&gt;自前のプログラムからカメラの映像をとれないことには何も始まらないので，まずはカメラを動かすプログラムを書く．&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Pythonからカメラの映像を取得・表示するプログラム&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*- coding: utf-8 -*-
+import numpy as np
+import cv2
+
+video = cv2.VideoCapture(0)
+
+cv2.namedWindow(&#39;camera view&#39;, cv2.WINDOW_NORMAL)
+
+while True:
+
+    ok, frame = video.read()
+
+    if not ok:
+        break
+
+    cv2.imshow(&#39;camera view&#39;, frame)
+
+    key = cv2.waitKey(10)
+
+    if key == ord(&#39;q&#39;):
+        break
+
+video.release()
+cv2.destroyAllWindows()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;このプログラムを実行すると以下のようにウインドウに撮影された画像が表示される．
+&lt;code&gt;q&lt;/code&gt;キーを叩けば終了する．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/python-osc/camera view.png&#34; alt=&#34;camera view&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;映像取得プログラムに色情報抽出-送信処理をくっつける&#34;&gt;映像取得プログラムに色情報抽出・送信処理をくっつける&lt;/h2&gt;
+
+&lt;p&gt;上記の映像取得プログラムに色情報の抽出処理を加えることを考える．
+画面に映った物体の色をおおまかにとるなら色チャネルごとの平均を求めれば良さそうな気がするが，
+それだけだとテーブルの色に値がひっぱられて綺麗に色をとることができない．
+そこで，画面内の彩度が高い部分のみを取り出すマスクを大津の2値化で作り，
+そのマスクを利用して彩度の高い色の平均を求め，Processing側に送信する．&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;彩度の高い部分のみの平均を求めて送信するプログラム&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# -*- coding: utf-8 -*-
+import numpy as np
+from scipy import signal
+import cv2
+from pythonosc import udp_client
+from pythonosc.osc_message_builder import OscMessageBuilder
+
+IP = &#39;127.0.0.1&#39;
+PORT = 6700
+
+# UDPのクライアントを作る
+client = udp_client.UDPClient(IP, PORT)
+
+video = cv2.VideoCapture(0)
+
+def send_color(r, g, b):
+    &amp;quot;&amp;quot;&amp;quot; 引数で渡された色をProcessing側に送信する &amp;quot;&amp;quot;&amp;quot;
+    msg = OscMessageBuilder(address=&#39;/color&#39;)
+    msg.add_arg(r)
+    msg.add_arg(g)
+    msg.add_arg(b)
+    m = msg.build()
+
+    print(m.address, m.params)
+    client.send(m)
+
+
+cv2.namedWindow(&#39;camera view&#39;, cv2.WINDOW_NORMAL)
+cv2.namedWindow(&#39;foreground&#39;, cv2.WINDOW_NORMAL)
+
+while True:
+
+    ok, frame = video.read()
+
+    if not ok:
+        break
+    
+    # 入力画像をぼかした画像を取得する
+    frame_blur = cv2.GaussianBlur(frame, (25, 25), 11)
+    # ぼかした画像をHSVに変換した画像を取得する
+    hsv = cv2.cvtColor(frame_blur, cv2.COLOR_BGR2HSV)
+    
+    # 彩度の大きい部分のみを2値化で取り出す
+    th, foreground = cv2.threshold(hsv[:, :, 1], 0, 255, cv2.THRESH_OTSU)
+    foreground_flag = (foreground == 255)
+    
+    # 色チャネルごとに平均を計算する
+    bgr_mean = frame_blur[foreground_flag].mean(axis=0)
+
+    # 色を送信する（OpenCVの画像はRGBではなくBGRなので注意）
+    b, g, r = map(int, bgr_mean.round())
+    send_color(r, g, b)
+
+    cv2.imshow(&#39;camera view&#39;, frame)
+    cv2.imshow(&#39;foreground&#39;, foreground)
+
+    key = cv2.waitKey(30)
+
+    if key == ord(&#39;q&#39;):
+        break
+
+video.release()
+cv2.destroyAllWindows()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;実行結果は以下の通り．
+左側がProcessingの画面，真ん中がカメラの映像，右側が彩度の高い部分を表すマスク画像である．
+結果から，カメラの映像に入ってきた本の色に応じてProcessing側の画面を変化させることが実現できていることがわかる．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/python-osc/result3.gif&#34; alt=&#34;send color 3&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;まとめ&#34;&gt;まとめ&lt;/h1&gt;
+
+&lt;p&gt;この記事では，PythonとProcessing間の連携を行うために，Open Sound Control (OSC) を用いた処理を実装した．&lt;/p&gt;
+
+&lt;p&gt;今回は送受信するデータとして色を扱ったが，もちろんその他のデータをやりとりすることもできる．
+例えば，送信側は座標を送信し，受信側は受信した位置に対して図形を描画する，といった表現も可能であると考えられる．&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>このブログについて</title>
       <link>https://eqs.github.io/post/first-post/</link>
       <pubDate>Sun, 21 Jan 2018 00:30:56 +0900</pubDate>
