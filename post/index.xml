@@ -110,7 +110,7 @@ Processing側にパラメタの設定のコードを追加すれば
 &lt;h2 id=&#34;01-identity-frag-恒等変換&#34;&gt;01_identity.frag : 恒等変換&lt;/h2&gt;
 
 &lt;p&gt;入力された画像をそのまま出力する変換である．
-新しくGLSLによる画像処理を実装する際はこのコードが雛形として用いると良い．&lt;/p&gt;
+新しくGLSLによる画像処理を実装する際はこのコードを雛形として用いると良い．&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/glsl-image-processing/glsl1.gif&#34; alt=&#34;identity&#34; /&gt;&lt;/p&gt;
 
