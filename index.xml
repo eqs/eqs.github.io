@@ -11,6 +11,175 @@
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Processingとフラグメントシェーダで画像処理を書いてみた</title>
+      <link>https://eqs.github.io/post/glsl-image-processing/</link>
+      <pubDate>Wed, 21 Mar 2018 14:44:21 +0900</pubDate>
+      
+      <guid>https://eqs.github.io/post/glsl-image-processing/</guid>
+      <description>&lt;p&gt;フラグメントシェーダとは，CGの描画パイプラインにおいて，
+ベクタ表現からラスタ表現に変換された画像の各ピクセルに対する処理を行うプログラムであり，3DCGの陰影表現などに用いられる．
+本記事では，OpenGL用のシェーダ記述言語であるGLSL (openGL Shading Language) を用いて記述した画像処理の例とその実行結果を紹介する．&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;フラグメントシェーダに関する詳しい文献&#34;&gt;フラグメントシェーダに関する詳しい文献&lt;/h1&gt;
+
+&lt;p&gt;フラグメントシェーダについては『The Book of Shaders』の説明がとてもわかりやすいため，そちらを参照されたい．&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The Book of Shaders&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://thebookofshaders.com/?lan=jp&#34; target=&#34;_blank&#34;&gt;https://thebookofshaders.com/?lan=jp&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&#34;デモ用アプリケーション&#34;&gt;デモ用アプリケーション&lt;/h1&gt;
+
+&lt;p&gt;Processingで作成した画像処理のデモ用アプリケーションを
+以下のリポジトリで公開している．
+このアプリケーションでは，PCに接続されているカメラから画像を読み込み，
+選択中のシェーダによる画像処理を行った結果をウインドウに表示する．&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;eqs/glsl-image-processing: samples of fragment shader&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/eqs/glsl-image-processing&#34; target=&#34;_blank&#34;&gt;https://github.com/eqs/glsl-image-processing&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;アプリケーションは以下の2つのライブラリを使用しているので，実行前にこれらをインストールしておく必要がある：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Video 1.0.1 (The Processing Foundation)&lt;/li&gt;
+&lt;li&gt;ControlP5 2.2.6 (Andreas Schlegel)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;processing上でglslを実行する際の最小構成&#34;&gt;Processing上でGLSLを実行する際の最小構成&lt;/h1&gt;
+
+&lt;p&gt;この記事を基にGLSLを記述する際，
+上記のデモ用プログラムは自分で改造するには機能が多すぎるかもしれない．
+そのため，GLSLの実行結果を確認するのに必要な最小限のコードを以下に示す．&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-processing&#34;&gt;import processing.video.*;
+
+final String shaderPath = &amp;quot;01_identity.frag&amp;quot;;
+
+PShader sh;
+PImage img;
+Capture cam;
+
+void setup() {
+  size(640, 480, P2D);
+  
+  String[] cameraList = Capture.list();
+  for (int k = 0; k &amp;lt; cameraList.length; k++) {
+    println(String.format(&amp;quot;%03d : %s&amp;quot;, k, cameraList[k]));
+  }
+  cam = new Capture(this, cameraList[0]);
+  cam.start();
+  
+  sh = loadShader(shaderPath);
+}
+
+void draw() {
+  background(0);
+  
+  sh.set(&amp;quot;u_time&amp;quot;, millis() / 1000.0);
+  sh.set(&amp;quot;u_resolution&amp;quot;, (float)width, (float)height);
+  
+  if (cam.available()) {
+    cam.read();
+  }
+  
+  shader(sh);
+  image(cam, 0, 0, width, height);
+  resetShader();
+}
+
+void mousePressed() {
+  sh = loadShader(shaderPath);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;アプリケーションで実装している各画像処理の実行結果&#34;&gt;アプリケーションで実装している各画像処理の実行結果&lt;/h1&gt;
+
+&lt;p&gt;アプリケーションでは，以下に述べる5つの画像処理を実装している（ひとつは何もしない変換なので実質4つ）．
+このアプリケーションでは画像処理のパラメタ（フィルタサイズや閾値など）を変更するUIは実装していないが，
+GLSLコード上ではuniform型で変数を宣言してあるため，
+Processing側にパラメタの設定のコードを追加すれば
+パラメタを変更した際の実行結果を確認することが可能である．&lt;/p&gt;
+
+&lt;h2 id=&#34;01-identity-frag-恒等変換&#34;&gt;01_identity.frag : 恒等変換&lt;/h2&gt;
+
+&lt;p&gt;入力された画像をそのまま出力する変換である．
+新しくGLSLによる画像処理を実装する際はこのコードが雛形として用いると良い．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/glsl-image-processing/glsl1.gif&#34; alt=&#34;identity&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;02-grayscale-frag-グレースケール変換&#34;&gt;02_grayscale.frag: グレースケール変換&lt;/h2&gt;
+
+&lt;p&gt;入力された画像をグレースケール化する変換である．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/glsl-image-processing/glsl2.gif&#34; alt=&#34;grayscale&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;03-averaging-filter-frag-平均化フィルタ-13x13&#34;&gt;03_averaging_filter.frag : 平均化フィルタ (13x13)&lt;/h2&gt;
+
+&lt;p&gt;入力された画像にたいして平均化フィルタをかける変換である．
+このコードを改造すれば，
+ガウシアンフィルタやラプラシアンフィルタも実装可能であると思われる．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/glsl-image-processing/glsl3.gif&#34; alt=&#34;averaging&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;04-chromakey-frag-クロマキー処理&#34;&gt;04_chromakey.frag : クロマキー処理&lt;/h2&gt;
+
+&lt;p&gt;入力された画像上の特定の色について，
+アルファ値をゼロにする（つまり，完全に透明にする）変換である．
+このデモ用アプリケーションの初期値は青色を透明化するように設定されている．
+また，透明化した後の背景には水玉模様がスクロールするアニメーションが表示されるようになっている（このアニメーションはGLSLではなくProcessing側で実装されている）．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/glsl-image-processing/glsl4.gif&#34; alt=&#34;chromakey&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;05-duotone-frag-デュオトーン&#34;&gt;05_duotone.frag : デュオトーン&lt;/h2&gt;
+
+&lt;p&gt;入力された画像についてデュオトーンによる変換をかける．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/glsl-image-processing/glsl5.gif&#34; alt=&#34;duotone&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;デュオトーンとは，2つの色から作成したグラデーションマップによって
+生成されるデザインである．
+以下のページにおいて，デザインの例とPhotoshopによる作成方法が述べられている．&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;超簡単！Photoshopで写真を今どきのデュオトーンに加工する方法（無料グラデーション収録） - PhotoshopVIP&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://photoshopvip.net/93748&#34; target=&#34;_blank&#34;&gt;http://photoshopvip.net/93748&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;code&gt;05_duotone.frag&lt;/code&gt;においては，この変換を次のようにして作成している：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;グラデーションマップの生成に使用する2つの色を用意する
+
+&lt;ul&gt;
+&lt;li&gt;プログラム中の&lt;code&gt;colorA&lt;/code&gt;および&lt;code&gt;colorB&lt;/code&gt;がこれに相当する&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;入力画像をグレースケール変換する&lt;/li&gt;
+&lt;li&gt;GLSLの&lt;code&gt;mix&lt;/code&gt;関数によって&lt;code&gt;colorA&lt;/code&gt;から&lt;code&gt;colorB&lt;/code&gt;に変化するグラデーションマップを作成し，グレーのグラデーションマップから新しいグラデーションマップへのマッピングを行う&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;グレーからカラーへのマッピングの対応は以下の図に示す通りで，
+暗い色は青色に近い色に，明るい色は黄色に近い色にマッピングされる．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://eqs.github.io/img/glsl-image-processing/gradation.png&#34; alt=&#34;gradation&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;まとめ&#34;&gt;まとめ&lt;/h1&gt;
+
+&lt;p&gt;本記事では，GLSLによって記述した画像処理をProcessing上で
+実行した結果を述べた．
+今回は簡単な画像処理のみを実装したが，バイラテラルフィルタやLine Integral Convolutionなどのクリエイティブコーディングにおいて有用な画像処理も
+実装可能であると考えられる．
+また，Processingの代わりにopenFrameworksで実行して強力なアドオンと組み合わせるのも良いと思われる．&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Open Sound ControlでPythonとProcessing間の連携をやってみた</title>
       <link>https://eqs.github.io/post/python-osc/</link>
       <pubDate>Sun, 28 Jan 2018 15:41:50 +0900</pubDate>
