@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Satoshi Murashige</title>
+    <link>https://eqs.github.io/post/</link>
+    <description>Recent content in Posts on Satoshi Murashige</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 21 Mar 2018 14:44:21 +0900</lastBuildDate>
+    
+	<atom:link href="https://eqs.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Processingとフラグメントシェーダで画像処理を書いてみた</title>
+      <link>https://eqs.github.io/post/glsl-image-processing/</link>
+      <pubDate>Wed, 21 Mar 2018 14:44:21 +0900</pubDate>
+      
+      <guid>https://eqs.github.io/post/glsl-image-processing/</guid>
+      <description>&lt;p&gt;フラグメントシェーダとは，CGの描画パイプラインにおいて，
+ベクタ表現からラスタ表現に変換された画像の各ピクセルに対する処理を行うプログラムであり，3DCGの陰影表現などに用いられる．
+本記事では，OpenGL用のシェーダ記述言語であるGLSL (openGL Shading Language) を用いて記述した画像処理の例とその実行結果を紹介する．&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Open Sound ControlでPythonとProcessing間の連携をやってみた</title>
+      <link>https://eqs.github.io/post/python-osc/</link>
+      <pubDate>Sun, 28 Jan 2018 15:41:50 +0900</pubDate>
+      
+      <guid>https://eqs.github.io/post/python-osc/</guid>
+      <description>&lt;p&gt;メディアアート開発の際，
+OpenCV for Pythonを用いた画像解析で映像から情報を抽出し，
+Processingで作った映像にその情報を反映したいというようなシチュエーションがある．
+OpenCVならProcessingにもライブラリはあるが，
+画像解析に関する試行錯誤はJupyter NotebookやSpyder IDEのあるPythonの方がやりやすい．
+そこで，PythonとProcessingの両方の良いところを活かすために
+Open Sound Control (OSC) による両者の連携を実装してみる．&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>このブログについて</title>
+      <link>https://eqs.github.io/post/first-post/</link>
+      <pubDate>Sun, 21 Jan 2018 00:30:56 +0900</pubDate>
+      
+      <guid>https://eqs.github.io/post/first-post/</guid>
+      <description>このブログでは開発で得た知識や技術に関するメモを書いていきます．</description>
+    </item>
+    
+  </channel>
+</rss>

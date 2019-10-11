@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Open Sound ControlでPythonとProcessing間の連携をやってみた</title>
+        
+        <style>
+
+    html body {
+        font-family: 'Fira Sans', sans-serif;
+        background-color: #F0F0F0;
+    }
+
+    :root {
+        --accent: #00BAFF;
+        --border-width:  5px ;
+    }
+
+</style>
+
+
+<link rel="stylesheet" href="https://eqs.github.io/css/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira%20Sans">
+
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"> 
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+ 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/julia.min.js"></script>
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<script>$(document).on('click', function() { $('.collapse').collapse('hide'); })</script>
+ <meta name="generator" content="Hugo 0.55.6" />
+        
+
+        
+
+        
+            <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+
+        
+
+    </head>
+
+    <body>
+        
+
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand visible-xs" href="#">Open Sound ControlでPythonとProcessing間の連携をやってみた</a>
+                    <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse">
+                    
+                        <ul class="nav navbar-nav">
+                            
+                                <li><a href="/">Home</a></li>
+                            
+                                <li><a href="/about/">About</a></li>
+                            
+                                <li><a href="/post/">Posts</a></li>
+                            
+                                <li><a href="/publication/">Publications</a></li>
+                            
+                        </ul>
+                    
+                    
+                        <ul class="nav navbar-nav navbar-right">
+                            
+                                <li class="navbar-icon"><a href="/contact/"><i class="fa fa-envelope-o"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://github.com/eqs/"><i class="fa fa-github"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="http://eqseqs.hatenablog.com/"><i class="fa fa-book"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://neort.io/Bsw7IKuDIHWFpctWFJobqGYJvN33"><i class="fa fa-paint-brush"></i></a></li>
+                            
+                        </ul>
+                    
+                </div>
+            </div>
+        </nav>
+
+
+<main>
+
+    <div>
+        <h2>Open Sound ControlでPythonとProcessing間の連携をやってみた</h2>
+        <h5>January 28, 2018</h5>
+        
+
+    </div>
+
+    <br> <div class="text-justify"><p>メディアアート開発の際，
+OpenCV for Pythonを用いた画像解析で映像から情報を抽出し，
+Processingで作った映像にその情報を反映したいというようなシチュエーションがある．
+OpenCVならProcessingにもライブラリはあるが，
+画像解析に関する試行錯誤はJupyter NotebookやSpyder IDEのあるPythonの方がやりやすい．
+そこで，PythonとProcessingの両方の良いところを活かすために
+Open Sound Control (OSC) による両者の連携を実装してみる．</p>
+
+<h1 id="環境">環境</h1>
+
+<p>この記事で使うPythonとProcessingの環境は以下の通り．</p>
+
+<ul>
+<li>Python 3.6.3 (Anaconda)</li>
+<li>Processing 3.3.6</li>
+<li>OpenCV 3.3.0</li>
+</ul>
+
+<h1 id="open-sound-control-osc">Open Sound Control (OSC)</h1>
+
+<p>OSCに関する説明は以下の記事が非常にわかりやすい．</p>
+
+<blockquote>
+<p>Processing Libraries 3 : oscP5 – OSCによるアプリケーション間通信 | yoppa.org</p>
+
+<p><a href="http://yoppa.org/sfc_design16/7927.html">http://yoppa.org/sfc_design16/7927.html</a></p>
+</blockquote>
+
+<h2 id="oscp5-processingでoscを扱えるようにするライブラリ"><code>oscP5</code> : ProcessingでOSCを扱えるようにするライブラリ</h2>
+
+<p>Processingでは<code>oscP5</code> (<a href="https://github.com/sojamo/oscp5)というライブラリをインストールすることでOSCを使うことができる．">https://github.com/sojamo/oscp5)というライブラリをインストールすることでOSCを使うことができる．</a>
+oscP5は以下のようにContribution Managerからインストール可能である．
+この記事ではバージョン<code>0.9.9</code>のものを用いた．</p>
+
+<p><img src="Contrib.png" alt="Contribution Manager" /></p>
+
+<h2 id="python-osc-pythonでoscを扱えるようにするモジュール"><code>python-osc</code> : PythonでOSCを扱えるようにするモジュール</h2>
+
+<p>Pythonでは<code>python-osc</code> (<a href="https://github.com/attwad/python-osc">https://github.com/attwad/python-osc</a>) というモジュールをインストールすれば使うことができる．
+インストールは下記のようにpipコマンドで出来る．
+この記事ではバージョン<code>1.6.4</code>のものを用いた．</p>
+
+<pre><code>pip install python-osc
+</code></pre>
+
+<h1 id="まずは簡単な命令の送受信を試す">まずは簡単な命令の送受信を試す</h1>
+
+<p>通信ができないことには画像解析との連携は無理なので，
+まずは簡単な命令のやりとりをPythonだけで作ってみる（まだProcessingは使わない）．</p>
+
+<p>例として，クライアントからRGB形式で表した色の情報をサーバで受信し，その内容をコンソールに表示してみる．
+クライアント側とサーバ側のプログラムはそれぞれ以下のようになる：</p>
+
+<p><strong>クライアント側</strong></p>
+
+<pre><code class="language-python"># -*- coding: utf-8 -*-
+from pythonosc import udp_client
+from pythonosc.osc_message_builder import OscMessageBuilder
+
+IP = '127.0.0.1'
+PORT = 6700
+
+# UDPのクライアントを作る
+client = udp_client.UDPClient(IP, PORT)
+
+# /colorに送信するメッセージを作って送信する
+msg = OscMessageBuilder(address='/color')
+msg.add_arg(0)
+msg.add_arg(228)
+msg.add_arg(123)
+m = msg.build()
+
+client.send(m)
+</code></pre>
+
+<p><strong>サーバ側</strong></p>
+
+<pre><code class="language-python"># -*- coding: utf-8 -*-
+from pythonosc import osc_server
+from pythonosc.dispatcher import Dispatcher
+
+def color_handler(unused_addr, red, green, blue):
+    &quot;&quot;&quot; 値を受信したときに行う処理 &quot;&quot;&quot;
+    print(f'received color : ({red}, {green}, {blue})')
+
+IP = '127.0.0.1'
+PORT = 6700
+
+# URLにコールバック関数を割り当てる
+dispatcher = Dispatcher()
+dispatcher.map('/color', color_handler)
+
+# サーバを起動する
+server = osc_server.ThreadingOSCUDPServer((IP, PORT), dispatcher)
+print(f'Serving on {server.server_address}')
+server.serve_forever()
+</code></pre>
+
+<h1 id="processingでoscによる通信を受け取る">ProcessingでOSCによる通信を受け取る</h1>
+
+<h2 id="受信した色をウインドウの色に反映する">受信した色をウインドウの色に反映する</h2>
+
+<p>次に受信側のプログラムをProcessingで書いてやる．
+受信したテキストをただコンソールに垂れ流すだけでは面白くないので，ウインドウの背景を受信した色に変更するようにしてみる．</p>
+
+<p><strong>ProcessingでOSCによる通信を受信するプログラム</strong></p>
+
+<pre><code class="language-processing">import netP5.*;
+import oscP5.*;
+
+OscP5 osc;
+color bg;
+
+void setup() {
+  size(400, 400);
+  // OSCの初期化 (受信ポートは6700に設定する)
+  osc = new OscP5(this, 6700);
+  // デフォルトの背景を白にしておく
+  bg = color(255, 255, 255);
+}
+
+void draw() {
+  background(bg);
+}
+
+void oscEvent(OscMessage msg) {
+  // アドレス /color に色を受信したら，それを背景に設定する
+  if (msg.checkAddrPattern(&quot;/color&quot;)) {
+    int r = msg.get(0).intValue();
+    int g = msg.get(1).intValue();
+    int b = msg.get(2).intValue();
+    bg = color(r, g, b);
+  }
+}
+</code></pre>
+
+<p>ここで，送信側のPythonのプログラムには特に変更は無いが，送信先のポート番号は受信側のポート番号と揃えておくこと．</p>
+
+<p>以下の画像が受信の結果．ウインドウの背景が色 (0, 228, 123) になってる．</p>
+
+<p><img src="result1.png" alt="send color 1" /></p>
+
+<h2 id="ランダムな色を送信する">ランダムな色を送信する</h2>
+
+<p>送信側のプログラムを改造して，ランダムな色をたくさん送りつけるようにする．</p>
+
+<p><strong>Pythonでランダムに色を送信するプログラム</strong></p>
+
+<pre><code class="language-python"># -*- coding: utf-8 -*-
+import random
+import time
+from pythonosc import udp_client
+from pythonosc.osc_message_builder import OscMessageBuilder
+
+IP = '127.0.0.1'
+PORT = 6700
+
+# UDPのクライアントを作る
+client = udp_client.UDPClient(IP, PORT)
+
+for k in range(10):
+    msg = OscMessageBuilder(address='/color')
+    msg.add_arg(random.randint(0, 255))
+    msg.add_arg(random.randint(0, 255))
+    msg.add_arg(random.randint(0, 255))
+    m = msg.build()
+
+    print(m.address, m.params)
+    client.send(m)
+
+    time.sleep(0.5)
+</code></pre>
+
+<p>実行結果は以下の通り．左側がProcessingのウインドウで右側がPythonのコンソールである．
+0.5秒間隔でランダムに送信した色がProcessing側に反映されていることがわかる．</p>
+
+<p><img src="result2.gif" alt="send color 2" /></p>
+
+<h1 id="画像解析とアートを組み合わせる例-pythonで計算した色ヒストグラムの情報をprocessingで作ったアートに反映する">画像解析とアートを組み合わせる例：Pythonで計算した色ヒストグラムの情報をProcessingで作ったアートに反映する</h1>
+
+<p>OSCをPythonとProcessingで扱うサンプルをみてきたので，いよいよ本題の画像解析との連携を行う．
+あまり複雑な問題にすると記事が長くなりそうなので簡単な画像解析の例として，
+<strong>カメラの映像に入ってきた物体の色を取得してProcessing側に送信する</strong>タスクを考える．</p>
+
+<h2 id="とりあえずカメラの映像を取得する">とりあえずカメラの映像を取得する</h2>
+
+<p>自前のプログラムからカメラの映像をとれないことには何も始まらないので，まずはカメラを動かすプログラムを書く．</p>
+
+<p><strong>Pythonからカメラの映像を取得・表示するプログラム</strong></p>
+
+<pre><code class="language-python"># -*- coding: utf-8 -*-
+import numpy as np
+import cv2
+
+video = cv2.VideoCapture(0)
+
+cv2.namedWindow('camera view', cv2.WINDOW_NORMAL)
+
+while True:
+
+    ok, frame = video.read()
+
+    if not ok:
+        break
+
+    cv2.imshow('camera view', frame)
+
+    key = cv2.waitKey(10)
+
+    if key == ord('q'):
+        break
+
+video.release()
+cv2.destroyAllWindows()
+</code></pre>
+
+<p>このプログラムを実行すると以下のようにウインドウに撮影された画像が表示される．
+<code>q</code>キーを叩けば終了する．</p>
+
+<p><img src="camera view.png" alt="camera view" /></p>
+
+<h2 id="映像取得プログラムに色情報抽出-送信処理をくっつける">映像取得プログラムに色情報抽出・送信処理をくっつける</h2>
+
+<p>上記の映像取得プログラムに色情報の抽出処理を加えることを考える．
+画面に映った物体の色をおおまかにとるなら色チャネルごとの平均を求めれば良さそうな気がするが，
+それだけだとテーブルの色に値がひっぱられて綺麗に色をとることができない．
+そこで，画面内の彩度が高い部分のみを取り出すマスクを大津の2値化で作り，
+そのマスクを利用して彩度の高い色の平均を求め，Processing側に送信する．</p>
+
+<p><strong>彩度の高い部分のみの平均を求めて送信するプログラム</strong></p>
+
+<pre><code class="language-python"># -*- coding: utf-8 -*-
+import numpy as np
+from scipy import signal
+import cv2
+from pythonosc import udp_client
+from pythonosc.osc_message_builder import OscMessageBuilder
+
+IP = '127.0.0.1'
+PORT = 6700
+
+# UDPのクライアントを作る
+client = udp_client.UDPClient(IP, PORT)
+
+video = cv2.VideoCapture(0)
+
+def send_color(r, g, b):
+    &quot;&quot;&quot; 引数で渡された色をProcessing側に送信する &quot;&quot;&quot;
+    msg = OscMessageBuilder(address='/color')
+    msg.add_arg(r)
+    msg.add_arg(g)
+    msg.add_arg(b)
+    m = msg.build()
+
+    print(m.address, m.params)
+    client.send(m)
+
+
+cv2.namedWindow('camera view', cv2.WINDOW_NORMAL)
+cv2.namedWindow('foreground', cv2.WINDOW_NORMAL)
+
+while True:
+
+    ok, frame = video.read()
+
+    if not ok:
+        break
+    
+    # 入力画像をぼかした画像を取得する
+    frame_blur = cv2.GaussianBlur(frame, (25, 25), 11)
+    # ぼかした画像をHSVに変換した画像を取得する
+    hsv = cv2.cvtColor(frame_blur, cv2.COLOR_BGR2HSV)
+    
+    # 彩度の大きい部分のみを2値化で取り出す
+    th, foreground = cv2.threshold(hsv[:, :, 1], 0, 255, cv2.THRESH_OTSU)
+    foreground_flag = (foreground == 255)
+    
+    # 色チャネルごとに平均を計算する
+    bgr_mean = frame_blur[foreground_flag].mean(axis=0)
+
+    # 色を送信する（OpenCVの画像はRGBではなくBGRなので注意）
+    b, g, r = map(int, bgr_mean.round())
+    send_color(r, g, b)
+
+    cv2.imshow('camera view', frame)
+    cv2.imshow('foreground', foreground)
+
+    key = cv2.waitKey(30)
+
+    if key == ord('q'):
+        break
+
+video.release()
+cv2.destroyAllWindows()
+</code></pre>
+
+<p>実行結果は以下の通り．
+左側がProcessingの画面，真ん中がカメラの映像，右側が彩度の高い部分を表すマスク画像である．
+結果から，カメラの映像に入ってきた本の色に応じてProcessing側の画面を変化させることが実現できていることがわかる．</p>
+
+<p><img src="result3.gif" alt="send color 3" /></p>
+
+<h1 id="まとめ">まとめ</h1>
+
+<p>この記事では，PythonとProcessing間の連携を行うために，Open Sound Control (OSC) を用いた処理を実装した．</p>
+
+<p>今回は送受信するデータとして色を扱ったが，もちろんその他のデータをやりとりすることもできる．
+例えば，送信側は座標を送信し，受信側は受信した位置に対して図形を描画する，といった表現も可能であると考えられる．</p></div>
+
+    
+    
+    
+
+    
+    
+
+</main>
+
+        <footer>
+            <p class="copyright text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io">Hugo</a> and <a href="https://github.com/calintat/minimal">Minimal</a>.</p>
+        </footer>
+
+        
+
+        
+    </body>
+
+</html>
+

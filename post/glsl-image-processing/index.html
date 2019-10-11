@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Processingとフラグメントシェーダで画像処理を書いてみた</title>
+        
+        <style>
+
+    html body {
+        font-family: 'Fira Sans', sans-serif;
+        background-color: #F0F0F0;
+    }
+
+    :root {
+        --accent: #00BAFF;
+        --border-width:  5px ;
+    }
+
+</style>
+
+
+<link rel="stylesheet" href="https://eqs.github.io/css/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira%20Sans">
+
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"> 
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+ 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/julia.min.js"></script>
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<script>$(document).on('click', function() { $('.collapse').collapse('hide'); })</script>
+ <meta name="generator" content="Hugo 0.55.6" />
+        
+
+        
+
+        
+            <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+
+        
+
+    </head>
+
+    <body>
+        
+
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand visible-xs" href="#">Processingとフラグメントシェーダで画像処理を書いてみた</a>
+                    <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse">
+                    
+                        <ul class="nav navbar-nav">
+                            
+                                <li><a href="/">Home</a></li>
+                            
+                                <li><a href="/about/">About</a></li>
+                            
+                                <li><a href="/post/">Posts</a></li>
+                            
+                                <li><a href="/publication/">Publications</a></li>
+                            
+                        </ul>
+                    
+                    
+                        <ul class="nav navbar-nav navbar-right">
+                            
+                                <li class="navbar-icon"><a href="/contact/"><i class="fa fa-envelope-o"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://github.com/eqs/"><i class="fa fa-github"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="http://eqseqs.hatenablog.com/"><i class="fa fa-book"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://neort.io/Bsw7IKuDIHWFpctWFJobqGYJvN33"><i class="fa fa-paint-brush"></i></a></li>
+                            
+                        </ul>
+                    
+                </div>
+            </div>
+        </nav>
+
+
+<main>
+
+    <div>
+        <h2>Processingとフラグメントシェーダで画像処理を書いてみた</h2>
+        <h5>March 21, 2018</h5>
+        
+
+    </div>
+
+    <br> <div class="text-justify"><p>フラグメントシェーダとは，CGの描画パイプラインにおいて，
+ベクタ表現からラスタ表現に変換された画像の各ピクセルに対する処理を行うプログラムであり，3DCGの陰影表現などに用いられる．
+本記事では，OpenGL用のシェーダ記述言語であるGLSL (openGL Shading Language) を用いて記述した画像処理の例とその実行結果を紹介する．</p>
+
+<h1 id="フラグメントシェーダに関する詳しい文献">フラグメントシェーダに関する詳しい文献</h1>
+
+<p>フラグメントシェーダについては『The Book of Shaders』の説明がとてもわかりやすいため，そちらを参照されたい．</p>
+
+<blockquote>
+<p>The Book of Shaders</p>
+
+<p><a href="https://thebookofshaders.com/?lan=jp">https://thebookofshaders.com/?lan=jp</a></p>
+</blockquote>
+
+<h1 id="デモ用アプリケーション">デモ用アプリケーション</h1>
+
+<p>Processingで作成した画像処理のデモ用アプリケーションを
+以下のリポジトリで公開している．
+このアプリケーションでは，PCに接続されているカメラから画像を読み込み，
+選択中のシェーダによる画像処理を行った結果をウインドウに表示する．</p>
+
+<blockquote>
+<p>eqs/glsl-image-processing: samples of fragment shader</p>
+
+<p><a href="https://github.com/eqs/glsl-image-processing">https://github.com/eqs/glsl-image-processing</a></p>
+</blockquote>
+
+<p>アプリケーションは以下の2つのライブラリを使用しているので，実行前にこれらをインストールしておく必要がある：</p>
+
+<ul>
+<li>Video 1.0.1 (The Processing Foundation)</li>
+<li>ControlP5 2.2.6 (Andreas Schlegel)</li>
+</ul>
+
+<h1 id="processing上でglslを実行する際の最小構成">Processing上でGLSLを実行する際の最小構成</h1>
+
+<p>この記事を基にGLSLを記述する際，
+上記のデモ用プログラムは自分で改造するには機能が多すぎるかもしれない．
+そのため，GLSLの実行結果を確認するのに必要な最小限のコードを以下に示す．</p>
+
+<pre><code class="language-processing">import processing.video.*;
+
+final String shaderPath = &quot;01_identity.frag&quot;;
+
+PShader sh;
+PImage img;
+Capture cam;
+
+void setup() {
+  size(640, 480, P2D);
+  
+  String[] cameraList = Capture.list();
+  for (int k = 0; k &lt; cameraList.length; k++) {
+    println(String.format(&quot;%03d : %s&quot;, k, cameraList[k]));
+  }
+  cam = new Capture(this, cameraList[0]);
+  cam.start();
+  
+  sh = loadShader(shaderPath);
+}
+
+void draw() {
+  background(0);
+  
+  sh.set(&quot;u_time&quot;, millis() / 1000.0);
+  sh.set(&quot;u_resolution&quot;, (float)width, (float)height);
+  
+  if (cam.available()) {
+    cam.read();
+  }
+  
+  shader(sh);
+  image(cam, 0, 0, width, height);
+  resetShader();
+}
+
+void mousePressed() {
+  sh = loadShader(shaderPath);
+}
+</code></pre>
+
+<h1 id="アプリケーションで実装している各画像処理の実行結果">アプリケーションで実装している各画像処理の実行結果</h1>
+
+<p>アプリケーションでは，以下に述べる5つの画像処理を実装している（ひとつは何もしない変換なので実質4つ）．
+このアプリケーションでは画像処理のパラメタ（フィルタサイズや閾値など）を変更するUIは実装していないが，
+GLSLコード上ではuniform型で変数を宣言してあるため，
+Processing側にパラメタの設定のコードを追加すれば
+パラメタを変更した際の実行結果を確認することが可能である．</p>
+
+<h2 id="01-identity-frag-恒等変換">01_identity.frag : 恒等変換</h2>
+
+<p>入力された画像をそのまま出力する変換である．
+新しくGLSLによる画像処理を実装する際はこのコードを雛形として用いると良い．</p>
+
+<p><img src="glsl1.gif" alt="identity" /></p>
+
+<h2 id="02-grayscale-frag-グレースケール変換">02_grayscale.frag: グレースケール変換</h2>
+
+<p>入力された画像をグレースケール化する変換である．</p>
+
+<p><img src="glsl2.gif" alt="grayscale" /></p>
+
+<h2 id="03-averaging-filter-frag-平均化フィルタ-13x13">03_averaging_filter.frag : 平均化フィルタ (13x13)</h2>
+
+<p>入力された画像にたいして平均化フィルタをかける変換である．
+このコードを改造すれば，
+ガウシアンフィルタやラプラシアンフィルタも実装可能であると思われる．</p>
+
+<p><img src="glsl3.gif" alt="averaging" /></p>
+
+<h2 id="04-chromakey-frag-クロマキー処理">04_chromakey.frag : クロマキー処理</h2>
+
+<p>入力された画像上の特定の色について，
+アルファ値をゼロにする（つまり，完全に透明にする）変換である．
+このデモ用アプリケーションの初期値は青色を透明化するように設定されている．
+また，透明化した後の背景には水玉模様がスクロールするアニメーションが表示されるようになっている（このアニメーションはGLSLではなくProcessing側で実装されている）．</p>
+
+<p><img src="glsl4.gif" alt="chromakey" /></p>
+
+<h2 id="05-duotone-frag-デュオトーン">05_duotone.frag : デュオトーン</h2>
+
+<p>入力された画像についてデュオトーンによる変換をかける．</p>
+
+<p><img src="glsl5.gif" alt="duotone" /></p>
+
+<p>デュオトーンとは，2つの色から作成したグラデーションマップによって
+生成されるデザインである．
+以下のページにおいて，デザインの例とPhotoshopによる作成方法が述べられている．</p>
+
+<blockquote>
+<p>超簡単！Photoshopで写真を今どきのデュオトーンに加工する方法（無料グラデーション収録） - PhotoshopVIP</p>
+
+<p><a href="http://photoshopvip.net/93748">http://photoshopvip.net/93748</a></p>
+</blockquote>
+
+<p><code>05_duotone.frag</code>においては，この変換を次のようにして作成している：</p>
+
+<ol>
+<li>グラデーションマップの生成に使用する2つの色を用意する
+
+<ul>
+<li>プログラム中の<code>colorA</code>および<code>colorB</code>がこれに相当する</li>
+</ul></li>
+<li>入力画像をグレースケール変換する</li>
+<li>GLSLの<code>mix</code>関数によって<code>colorA</code>から<code>colorB</code>に変化するグラデーションマップを作成し，グレーのグラデーションマップから新しいグラデーションマップへのマッピングを行う</li>
+</ol>
+
+<p>グレーからカラーへのマッピングの対応は以下の図に示す通りで，
+暗い色は青色に近い色に，明るい色は黄色に近い色にマッピングされる．</p>
+
+<p><img src="gradation.png" alt="gradation" /></p>
+
+<h1 id="まとめ">まとめ</h1>
+
+<p>本記事では，GLSLによって記述した画像処理をProcessing上で
+実行した結果を述べた．
+今回は簡単な画像処理のみを実装したが，バイラテラルフィルタやLine Integral Convolutionなどのクリエイティブコーディングにおいて有用な画像処理も
+実装可能であると考えられる．
+また，Processingの代わりにopenFrameworksで実行して強力なアドオンと組み合わせるのも良いと思われる．</p></div>
+
+    
+    
+    
+
+    
+    
+
+</main>
+
+        <footer>
+            <p class="copyright text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io">Hugo</a> and <a href="https://github.com/calintat/minimal">Minimal</a>.</p>
+        </footer>
+
+        
+
+        
+    </body>
+
+</html>
+
