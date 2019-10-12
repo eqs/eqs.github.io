@@ -76,5 +76,31 @@ Skill  Programming languages  Python (Numpy, PyTorch, Keras, OpenCV, scikit-lear
       <description>Satoshi Murashige, Noriaki Suetake, and Takanori Koga, ``Hand Gesture Recognition and Tracking for IR Image Using Random Forest and Median Flow,&amp;rdquo; Proc. of 2018 International Workshop on Smart Info-Media Systems in Asia (SISA 2018), pp.34-39, Kanagawa, Japan, Dec. 13-14, 2018. Murashige, S., Kubo, T., Ouchi, R., Nakahara, E., Kikusui, T. &amp;amp; Ikeda, K., Tracking of Body Parts of the Dog using DeepLabCut. 日本動物心理学会第78回大会, 広島, 2018年8月. (oral) 村重哲史, 古賀崇了, &amp;ldquo;Random ForestとMedian Flowを用いたハンドジェスチャの認識と追跡に関する検討,&amp;rdquo; 信学技報, Vol.</description>
     </item>
     
+    <item>
+      <title>SOAR</title>
+      <link>https://eqs.github.io/project/soar/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://eqs.github.io/project/soar/</guid>
+      <description>駅や商業施設に設置されることを想定したディジタルサイネージです．人が前を通過したり手を仰ぐような動作を行うと，映像中の落ち葉や花びらが反応して舞い上がるアニメーションが流れます．
+人の動作の検出にKinectのような特殊なセンサを使用しておらず，ディスプレイ（またはプロジェクタ），実行用PC，Webカメラだけあれば設置することが可能です．
+私は，Python + OpenCVによるカメラの映像から人の動作を検出する画像処理， Unityによる落ち葉のアニメーション，およびそれらの連携の実装を担当しました．
+【開発人数】2人
+Media  2017.11.30: NHK山口放送局「情報維新！やまぐち」の番組内で作品が紹介されました 2018.7.20: シティケーブル周南「夢色アサンブラ vol.125」の番組内で作品が紹介されました 2018.8.11: 山口県周南市立徳山駅前図書館で開催された，「クリエイティブキッズキャンプ」で作品が展示されました  また，2017-2018年の徳山高専のオープンキャンパスや文化祭でも展示されました．</description>
+    </item>
+    
+    <item>
+      <title>しゅうニャン思い出カメラ</title>
+      <link>https://eqs.github.io/project/ihis2018/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://eqs.github.io/project/ihis2018/</guid>
+      <description> この作品は石巻ハッカソン in 周ニャン市 2018（テーマ「駅」, https://connpass.com/event/72623/ ）で開発した作品です．駅でお土産を買って紙袋をもらうと，紙袋の位置に応じて，記念撮影ボードの背景の動物たちがインタラクティブに反応する，という内容です．
+人が紙袋を持ってカメラの前に立つと，周南市のロゴがマーカーとして検出され，その高さに応じて背景映像が変化します．記念撮影を行うと映像上にQRコードが表示され，それをリーダーで読み取ることで撮影した写真をスマートフォンなどにダウンロードすることが可能です．
+私は，紙袋に描かれた周南市のロゴを画像処理でトラッキングする処理と，プロジェクタ・カメラ間のキャリブレーションを担当しました．
+【開発人数】8人
+Achievement  2018.3: 「石巻ハッカソン in 周ニャン市 2018」でグランプリを受賞しました  </description>
+    </item>
+    
   </channel>
 </rss>
