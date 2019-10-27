@@ -6,10 +6,24 @@
     <description>Recent content in Posts on Satoshi Murashige</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 21 Mar 2018 14:44:21 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 27 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://eqs.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>最近の活動</title>
+      <link>https://eqs.github.io/post/blogs/</link>
+      <pubDate>Sun, 27 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://eqs.github.io/post/blogs/</guid>
+      <description>少し前だけど，Webページ作るために使ってたHugoのテーマ (Academic) の バージョンアップをサボっていたら古くなってページが更新できなくなってたので， 思い切って全面リニューアルした． .workドメインが1円でとれるらしかったのでこのサイト用のドメインもとった．
+ブログは最近は以下の2つに移行している：
+ 技術ブログ：https://eqseqs.hatenablog.com/ メディアアートとかその周辺技術の話：https://note.mu/eqs  Hugoでpost書くのってGit経由しないといけないのがどうも面倒臭くて． 何かひらめいたときにブログ開いては下書き書いてすぐ閉じる， みたいなやりかたの方が自分にあってるらしい．
+ブログはここに書いてたのと同じメディアアート関係をnoteに， 読んだ論文とかその他の技術全般をはてなブログに，という分け方をしている． どちらも結局技術ブログなのだけど，noteは趣味の話だけを発信する場が欲しくて始めた．
+この記事に特にオチは無いのだが，もしこのまともなポストが2つしかないブログを 読んで下さっている方がいるようなら， 上記ブログも覗いてもらえると何か得るものがあるかもしれない．
+しかも，noteではクリエイターをサポートすることができる．</description>
+    </item>
     
     <item>
       <title>Processingとフラグメントシェーダで画像処理を書いてみた</title>

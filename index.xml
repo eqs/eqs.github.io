@@ -6,10 +6,24 @@
     <description>Recent content on Satoshi Murashige</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 21 Mar 2018 14:44:21 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 27 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://eqs.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>最近の活動</title>
+      <link>https://eqs.github.io/post/blogs/</link>
+      <pubDate>Sun, 27 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://eqs.github.io/post/blogs/</guid>
+      <description>少し前だけど，Webページ作るために使ってたHugoのテーマ (Academic) の バージョンアップをサボっていたら古くなってページが更新できなくなってたので， 思い切って全面リニューアルした． .workドメインが1円でとれるらしかったのでこのサイト用のドメインもとった．
+ブログは最近は以下の2つに移行している：
+ 技術ブログ：https://eqseqs.hatenablog.com/ メディアアートとかその周辺技術の話：https://note.mu/eqs  Hugoでpost書くのってGit経由しないといけないのがどうも面倒臭くて． 何かひらめいたときにブログ開いては下書き書いてすぐ閉じる， みたいなやりかたの方が自分にあってるらしい．
+ブログはここに書いてたのと同じメディアアート関係をnoteに， 読んだ論文とかその他の技術全般をはてなブログに，という分け方をしている． どちらも結局技術ブログなのだけど，noteは趣味の話だけを発信する場が欲しくて始めた．
+この記事に特にオチは無いのだが，もしこのまともなポストが2つしかないブログを 読んで下さっている方がいるようなら， 上記ブログも覗いてもらえると何か得るものがあるかもしれない．
+しかも，noteではクリエイターをサポートすることができる．</description>
+    </item>
     
     <item>
       <title>Processingとフラグメントシェーダで画像処理を書いてみた</title>
@@ -54,7 +68,7 @@ Open Sound Control (OSC) による両者の連携を実装してみる．&lt;/p&
       <guid>https://eqs.github.io/about/</guid>
       <description>I am a master cource student at the Mathematical Informatics Laboratory, in Nara Institute of Science and Technology a.k.a. NAIST.
 Research Interest Computer Vision methods for automatic measurement and quantification of animals behavior
-Skill  Programming languages  Python (Numpy, PyTorch, Keras, OpenCV, scikit-learn, Flask) Julia MATLAB JavaScript (Vue.js, p5.js) Java (Processing) C# (Unity) C++ (openFrameworks) GLSL CUDA C  Tools  Git Docker DeepLabCut   Affiliated Academic Society  情報処理学会 (2014年~) 日本動物心理学会 (2018年~)  Education  2011.</description>
+Skill  Programming languages (Frameworks)  Python (Numpy, PyTorch, Keras, OpenCV, scikit-learn, Flask, MATLAB, pybind11, etc.) Julia MATLAB JavaScript (Vue.js, p5.js) Java Processing (Keystone, oscP5, etc.) C# (Unity) C++ (openFrameworks, pybind11) GLSL CUDA C  Tools  Git (+ GitHub) Docker DeepLabCut   Affiliated Academic Society  Information Processing Sciety of Japan (2014-)  情報処理学会 (2014年~)  The Japanese Society for Animal Psychology (2018-)  日本動物心理学会 (2018年~)   Education  2011.</description>
     </item>
     
     <item>

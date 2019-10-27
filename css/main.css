@@ -34,7 +34,7 @@ img {
 
 .intro > h1 {
     color: #212121;
-    font-size: 12vh;
+    font-size: 6vmin;
 }
 
 .intro > h2 {
@@ -43,8 +43,8 @@ img {
 }
 
 .intro > .profile {
-    width: 10vh;
-    height: 10vh;
+    width: 18vmin;
+    height: 18vmin;
     border-radius: 50%;
 }
 
