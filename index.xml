@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Satoshi Murashige</title>
@@ -68,7 +68,7 @@ Open Sound Control (OSC) による両者の連携を実装してみる．&lt;/p&
       <guid>https://eqs.github.io/about/</guid>
       <description>I am a master cource student at the Mathematical Informatics Laboratory, in Nara Institute of Science and Technology a.k.a. NAIST.
 Research Interest Computer Vision methods for automatic measurement and quantification of animals behavior
-Skill  Programming languages (Frameworks)  Python (Numpy, PyTorch, Keras, OpenCV, scikit-learn, Flask, MATLAB, pybind11, etc.) Julia MATLAB JavaScript (Vue.js, p5.js) Java Processing (Keystone, oscP5, etc.) C# (Unity) C++ (openFrameworks, pybind11) GLSL CUDA C  Tools  Git (+ GitHub) Docker DeepLabCut   Affiliated Academic Society  Information Processing Sciety of Japan (2014-)  情報処理学会 (2014年~)  The Japanese Society for Animal Psychology (2018-)  日本動物心理学会 (2018年~)   Education  2011.</description>
+Skill  Programming languages (Frameworks)  Python (Numpy, PyTorch, Keras, OpenCV, scikit-learn, Flask, MATLAB, pybind11, etc.) Julia MATLAB JavaScript (Vue.js, p5.js) Java Processing (Keystone, oscP5, etc.) C# (Unity) C++ (openFrameworks, pybind11) GLSL CUDA C   Tools  Git (+ GitHub) Docker DeepLabCut    Affiliated Academic Society  Information Processing Sciety of Japan (2014-)  情報処理学会 (2014年~)   The Japanese Society for Animal Psychology (2018-)  日本動物心理学会 (2018年~)    Education  2011.</description>
     </item>
     
     <item>
@@ -87,7 +87,7 @@ Skill  Programming languages (Frameworks)  Python (Numpy, PyTorch, Keras, OpenCV
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://eqs.github.io/publication/</guid>
-      <description>International Conference  Satoshi Murashige, Noriaki Suetake, and Takanori Koga, ``Hand Gesture Recognition and Tracking for IR Image Using Random Forest and Median Flow,&amp;rdquo; Proc. of 2018 International Workshop on Smart Info-Media Systems in Asia (SISA 2018), pp.34-39, Kanagawa, Japan, Dec. 13-14, 2018.  Domestic Conference  Murashige, S., Kubo, T., Nagasawa, M., Kikusui, T., Ueda, E., Takimoto-Inose, A. &amp;amp; Ikeda, K., Multiple Animal Pose Tracking for Social Behavior Analysis.</description>
+      <description>International Conference  Satoshi Murashige, Noriaki Suetake, and Takanori Koga, ``Hand Gesture Recognition and Tracking for IR Image Using Random Forest and Median Flow,&amp;rsquo;&amp;rsquo; Proc. of 2018 International Workshop on Smart Info-Media Systems in Asia (SISA 2018), pp.34-39, Kanagawa, Japan, Dec. 13-14, 2018.  Domestic Conference  村重哲史, 久保孝富, 永澤美保, 菊水健史, 池田和司, &amp;ldquo;自然状況下インタラクション解析に向けた動物集団の映像に対する姿勢推定,&amp;rdquo; 信学技報, vol. 119, no. 382, NC2019-58, p. 1, 沖縄, 2020年1月. Murashige, S., Kubo, T., Nagasawa, M., Kikusui, T.</description>
     </item>
     
     <item>
@@ -109,7 +109,7 @@ Media  2017.11.30: NHK山口放送局「情報維新！やまぐち」の番組�
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://eqs.github.io/project/ihis2018/</guid>
-      <description> この作品は石巻ハッカソン in 周ニャン市 2018（テーマ「駅」, https://connpass.com/event/72623/ ）で開発した作品です．駅でお土産を買って紙袋をもらうと，紙袋の位置に応じて，記念撮影ボードの背景の動物たちがインタラクティブに反応する，という内容です．
+      <description>  この作品は石巻ハッカソン in 周ニャン市 2018（テーマ「駅」, https://connpass.com/event/72623/ ）で開発した作品です．駅でお土産を買って紙袋をもらうと，紙袋の位置に応じて，記念撮影ボードの背景の動物たちがインタラクティブに反応する，という内容です．
 人が紙袋を持ってカメラの前に立つと，周南市のロゴがマーカーとして検出され，その高さに応じて背景映像が変化します．記念撮影を行うと映像上にQRコードが表示され，それをリーダーで読み取ることで撮影した写真をスマートフォンなどにダウンロードすることが可能です．
 私は，紙袋に描かれた周南市のロゴを画像処理でトラッキングする処理と，プロジェクタ・カメラ間のキャリブレーションを担当しました．
 【開発人数】8人
