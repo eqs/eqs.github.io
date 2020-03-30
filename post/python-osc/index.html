@@ -65,7 +65,7 @@
 <script src="/js/p5.js" type="text/javascript"></script>
 <script src="/js/p5.min.js" type="text/javascript"></script>
 <script src="/js/mysketch.js" type="text/javascript"></script>
- <meta name="generator" content="Hugo 0.55.6" />
+ <meta name="generator" content="Hugo 0.60.1" />
         
 
         
@@ -151,107 +151,79 @@ OpenCVならProcessingにもライブラリはあるが，
 画像解析に関する試行錯誤はJupyter NotebookやSpyder IDEのあるPythonの方がやりやすい．
 そこで，PythonとProcessingの両方の良いところを活かすために
 Open Sound Control (OSC) による両者の連携を実装してみる．</p>
-
-<h1 id="環境">環境</h1>
-
+<h1 id="heading">環境</h1>
 <p>この記事で使うPythonとProcessingの環境は以下の通り．</p>
-
 <ul>
 <li>Python 3.6.3 (Anaconda)</li>
 <li>Processing 3.3.6</li>
 <li>OpenCV 3.3.0</li>
 </ul>
-
 <h1 id="open-sound-control-osc">Open Sound Control (OSC)</h1>
-
 <p>OSCに関する説明は以下の記事が非常にわかりやすい．</p>
-
 <blockquote>
 <p>Processing Libraries 3 : oscP5 – OSCによるアプリケーション間通信 | yoppa.org</p>
-
 <p><a href="http://yoppa.org/sfc_design16/7927.html">http://yoppa.org/sfc_design16/7927.html</a></p>
 </blockquote>
-
-<h2 id="oscp5-processingでoscを扱えるようにするライブラリ"><code>oscP5</code> : ProcessingでOSCを扱えるようにするライブラリ</h2>
-
-<p>Processingでは<code>oscP5</code> (<a href="https://github.com/sojamo/oscp5)というライブラリをインストールすることでOSCを使うことができる．">https://github.com/sojamo/oscp5)というライブラリをインストールすることでOSCを使うことができる．</a>
+<h2 id="oscp5--processingosc"><code>oscP5</code> : ProcessingでOSCを扱えるようにするライブラリ</h2>
+<p>Processingでは<code>oscP5</code> (<a href="https://github.com/sojamo/oscp5">https://github.com/sojamo/oscp5</a>)というライブラリをインストールすることでOSCを使うことができる．
 oscP5は以下のようにContribution Managerからインストール可能である．
 この記事ではバージョン<code>0.9.9</code>のものを用いた．</p>
-
-<p><img src="Contrib.png" alt="Contribution Manager" /></p>
-
-<h2 id="python-osc-pythonでoscを扱えるようにするモジュール"><code>python-osc</code> : PythonでOSCを扱えるようにするモジュール</h2>
-
+<p><img src="Contrib.png" alt="Contribution Manager"></p>
+<h2 id="pythonosc--pythonosc"><code>python-osc</code> : PythonでOSCを扱えるようにするモジュール</h2>
 <p>Pythonでは<code>python-osc</code> (<a href="https://github.com/attwad/python-osc">https://github.com/attwad/python-osc</a>) というモジュールをインストールすれば使うことができる．
 インストールは下記のようにpipコマンドで出来る．
 この記事ではバージョン<code>1.6.4</code>のものを用いた．</p>
-
 <pre><code>pip install python-osc
-</code></pre>
-
-<h1 id="まずは簡単な命令の送受信を試す">まずは簡単な命令の送受信を試す</h1>
-
+</code></pre><h1 id="heading1">まずは簡単な命令の送受信を試す</h1>
 <p>通信ができないことには画像解析との連携は無理なので，
 まずは簡単な命令のやりとりをPythonだけで作ってみる（まだProcessingは使わない）．</p>
-
 <p>例として，クライアントからRGB形式で表した色の情報をサーバで受信し，その内容をコンソールに表示してみる．
 クライアント側とサーバ側のプログラムはそれぞれ以下のようになる：</p>
-
 <p><strong>クライアント側</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># -*- coding: utf-8 -*-</span>
+<span style="color:#f92672">from</span> pythonosc <span style="color:#f92672">import</span> udp_client
+<span style="color:#f92672">from</span> pythonosc.osc_message_builder <span style="color:#f92672">import</span> OscMessageBuilder
 
-<pre><code class="language-python"># -*- coding: utf-8 -*-
-from pythonosc import udp_client
-from pythonosc.osc_message_builder import OscMessageBuilder
+IP <span style="color:#f92672">=</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">127.0.0.1</span><span style="color:#e6db74">&#39;</span>
+PORT <span style="color:#f92672">=</span> <span style="color:#ae81ff">6700</span>
 
-IP = '127.0.0.1'
-PORT = 6700
+<span style="color:#75715e"># UDPのクライアントを作る</span>
+client <span style="color:#f92672">=</span> udp_client<span style="color:#f92672">.</span>UDPClient(IP, PORT)
 
-# UDPのクライアントを作る
-client = udp_client.UDPClient(IP, PORT)
+<span style="color:#75715e"># /colorに送信するメッセージを作って送信する</span>
+msg <span style="color:#f92672">=</span> OscMessageBuilder(address<span style="color:#f92672">=</span><span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">/color</span><span style="color:#e6db74">&#39;</span>)
+msg<span style="color:#f92672">.</span>add_arg(<span style="color:#ae81ff">0</span>)
+msg<span style="color:#f92672">.</span>add_arg(<span style="color:#ae81ff">228</span>)
+msg<span style="color:#f92672">.</span>add_arg(<span style="color:#ae81ff">123</span>)
+m <span style="color:#f92672">=</span> msg<span style="color:#f92672">.</span>build()
 
-# /colorに送信するメッセージを作って送信する
-msg = OscMessageBuilder(address='/color')
-msg.add_arg(0)
-msg.add_arg(228)
-msg.add_arg(123)
-m = msg.build()
+client<span style="color:#f92672">.</span>send(m)
+</code></pre></div><p><strong>サーバ側</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># -*- coding: utf-8 -*-</span>
+<span style="color:#f92672">from</span> pythonosc <span style="color:#f92672">import</span> osc_server
+<span style="color:#f92672">from</span> pythonosc.dispatcher <span style="color:#f92672">import</span> Dispatcher
 
-client.send(m)
-</code></pre>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">color_handler</span>(unused_addr, red, green, blue):
+    <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#e6db74"> 値を受信したときに行う処理 </span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+    <span style="color:#66d9ef">print</span>(f<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">received color : ({red}, {green}, {blue})</span><span style="color:#e6db74">&#39;</span>)
 
-<p><strong>サーバ側</strong></p>
+IP <span style="color:#f92672">=</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">127.0.0.1</span><span style="color:#e6db74">&#39;</span>
+PORT <span style="color:#f92672">=</span> <span style="color:#ae81ff">6700</span>
 
-<pre><code class="language-python"># -*- coding: utf-8 -*-
-from pythonosc import osc_server
-from pythonosc.dispatcher import Dispatcher
+<span style="color:#75715e"># URLにコールバック関数を割り当てる</span>
+dispatcher <span style="color:#f92672">=</span> Dispatcher()
+dispatcher<span style="color:#f92672">.</span>map(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">/color</span><span style="color:#e6db74">&#39;</span>, color_handler)
 
-def color_handler(unused_addr, red, green, blue):
-    &quot;&quot;&quot; 値を受信したときに行う処理 &quot;&quot;&quot;
-    print(f'received color : ({red}, {green}, {blue})')
-
-IP = '127.0.0.1'
-PORT = 6700
-
-# URLにコールバック関数を割り当てる
-dispatcher = Dispatcher()
-dispatcher.map('/color', color_handler)
-
-# サーバを起動する
-server = osc_server.ThreadingOSCUDPServer((IP, PORT), dispatcher)
-print(f'Serving on {server.server_address}')
-server.serve_forever()
-</code></pre>
-
-<h1 id="processingでoscによる通信を受け取る">ProcessingでOSCによる通信を受け取る</h1>
-
-<h2 id="受信した色をウインドウの色に反映する">受信した色をウインドウの色に反映する</h2>
-
+<span style="color:#75715e"># サーバを起動する</span>
+server <span style="color:#f92672">=</span> osc_server<span style="color:#f92672">.</span>ThreadingOSCUDPServer((IP, PORT), dispatcher)
+<span style="color:#66d9ef">print</span>(f<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">Serving on {server.server_address}</span><span style="color:#e6db74">&#39;</span>)
+server<span style="color:#f92672">.</span>serve_forever()
+</code></pre></div><h1 id="processingosc">ProcessingでOSCによる通信を受け取る</h1>
+<h2 id="heading2">受信した色をウインドウの色に反映する</h2>
 <p>次に受信側のプログラムをProcessingで書いてやる．
 受信したテキストをただコンソールに垂れ流すだけでは面白くないので，ウインドウの背景を受信した色に変更するようにしてみる．</p>
-
 <p><strong>ProcessingでOSCによる通信を受信するプログラム</strong></p>
-
-<pre><code class="language-processing">import netP5.*;
+<pre><code class="language-processing" data-lang="processing">import netP5.*;
 import oscP5.*;
 
 OscP5 osc;
@@ -278,178 +250,148 @@ void oscEvent(OscMessage msg) {
     bg = color(r, g, b);
   }
 }
-</code></pre>
-
-<p>ここで，送信側のPythonのプログラムには特に変更は無いが，送信先のポート番号は受信側のポート番号と揃えておくこと．</p>
-
+</code></pre><p>ここで，送信側のPythonのプログラムには特に変更は無いが，送信先のポート番号は受信側のポート番号と揃えておくこと．</p>
 <p>以下の画像が受信の結果．ウインドウの背景が色 (0, 228, 123) になってる．</p>
-
-<p><img src="result1.png" alt="send color 1" /></p>
-
-<h2 id="ランダムな色を送信する">ランダムな色を送信する</h2>
-
+<p><img src="result1.png" alt="send color 1"></p>
+<h2 id="heading3">ランダムな色を送信する</h2>
 <p>送信側のプログラムを改造して，ランダムな色をたくさん送りつけるようにする．</p>
-
 <p><strong>Pythonでランダムに色を送信するプログラム</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># -*- coding: utf-8 -*-</span>
+<span style="color:#f92672">import</span> random
+<span style="color:#f92672">import</span> time
+<span style="color:#f92672">from</span> pythonosc <span style="color:#f92672">import</span> udp_client
+<span style="color:#f92672">from</span> pythonosc.osc_message_builder <span style="color:#f92672">import</span> OscMessageBuilder
 
-<pre><code class="language-python"># -*- coding: utf-8 -*-
-import random
-import time
-from pythonosc import udp_client
-from pythonosc.osc_message_builder import OscMessageBuilder
+IP <span style="color:#f92672">=</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">127.0.0.1</span><span style="color:#e6db74">&#39;</span>
+PORT <span style="color:#f92672">=</span> <span style="color:#ae81ff">6700</span>
 
-IP = '127.0.0.1'
-PORT = 6700
+<span style="color:#75715e"># UDPのクライアントを作る</span>
+client <span style="color:#f92672">=</span> udp_client<span style="color:#f92672">.</span>UDPClient(IP, PORT)
 
-# UDPのクライアントを作る
-client = udp_client.UDPClient(IP, PORT)
+<span style="color:#66d9ef">for</span> k <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+    msg <span style="color:#f92672">=</span> OscMessageBuilder(address<span style="color:#f92672">=</span><span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">/color</span><span style="color:#e6db74">&#39;</span>)
+    msg<span style="color:#f92672">.</span>add_arg(random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">255</span>))
+    msg<span style="color:#f92672">.</span>add_arg(random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">255</span>))
+    msg<span style="color:#f92672">.</span>add_arg(random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">255</span>))
+    m <span style="color:#f92672">=</span> msg<span style="color:#f92672">.</span>build()
 
-for k in range(10):
-    msg = OscMessageBuilder(address='/color')
-    msg.add_arg(random.randint(0, 255))
-    msg.add_arg(random.randint(0, 255))
-    msg.add_arg(random.randint(0, 255))
-    m = msg.build()
+    <span style="color:#66d9ef">print</span>(m<span style="color:#f92672">.</span>address, m<span style="color:#f92672">.</span>params)
+    client<span style="color:#f92672">.</span>send(m)
 
-    print(m.address, m.params)
-    client.send(m)
-
-    time.sleep(0.5)
-</code></pre>
-
-<p>実行結果は以下の通り．左側がProcessingのウインドウで右側がPythonのコンソールである．
+    time<span style="color:#f92672">.</span>sleep(<span style="color:#ae81ff">0.5</span>)
+</code></pre></div><p>実行結果は以下の通り．左側がProcessingのウインドウで右側がPythonのコンソールである．
 0.5秒間隔でランダムに送信した色がProcessing側に反映されていることがわかる．</p>
-
-<p><img src="result2.gif" alt="send color 2" /></p>
-
-<h1 id="画像解析とアートを組み合わせる例-pythonで計算した色ヒストグラムの情報をprocessingで作ったアートに反映する">画像解析とアートを組み合わせる例：Pythonで計算した色ヒストグラムの情報をProcessingで作ったアートに反映する</h1>
-
+<p><img src="result2.gif" alt="send color 2"></p>
+<h1 id="pythonprocessing">画像解析とアートを組み合わせる例：Pythonで計算した色ヒストグラムの情報をProcessingで作ったアートに反映する</h1>
 <p>OSCをPythonとProcessingで扱うサンプルをみてきたので，いよいよ本題の画像解析との連携を行う．
 あまり複雑な問題にすると記事が長くなりそうなので簡単な画像解析の例として，
 <strong>カメラの映像に入ってきた物体の色を取得してProcessing側に送信する</strong>タスクを考える．</p>
-
-<h2 id="とりあえずカメラの映像を取得する">とりあえずカメラの映像を取得する</h2>
-
+<h2 id="heading4">とりあえずカメラの映像を取得する</h2>
 <p>自前のプログラムからカメラの映像をとれないことには何も始まらないので，まずはカメラを動かすプログラムを書く．</p>
-
 <p><strong>Pythonからカメラの映像を取得・表示するプログラム</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># -*- coding: utf-8 -*-</span>
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+<span style="color:#f92672">import</span> cv2
 
-<pre><code class="language-python"># -*- coding: utf-8 -*-
-import numpy as np
-import cv2
+video <span style="color:#f92672">=</span> cv2<span style="color:#f92672">.</span>VideoCapture(<span style="color:#ae81ff">0</span>)
 
-video = cv2.VideoCapture(0)
+cv2<span style="color:#f92672">.</span>namedWindow(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">camera view</span><span style="color:#e6db74">&#39;</span>, cv2<span style="color:#f92672">.</span>WINDOW_NORMAL)
 
-cv2.namedWindow('camera view', cv2.WINDOW_NORMAL)
+<span style="color:#66d9ef">while</span> True:
 
-while True:
+    ok, frame <span style="color:#f92672">=</span> video<span style="color:#f92672">.</span>read()
 
-    ok, frame = video.read()
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> ok:
+        <span style="color:#66d9ef">break</span>
 
-    if not ok:
-        break
+    cv2<span style="color:#f92672">.</span>imshow(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">camera view</span><span style="color:#e6db74">&#39;</span>, frame)
 
-    cv2.imshow('camera view', frame)
+    key <span style="color:#f92672">=</span> cv2<span style="color:#f92672">.</span>waitKey(<span style="color:#ae81ff">10</span>)
 
-    key = cv2.waitKey(10)
+    <span style="color:#66d9ef">if</span> key <span style="color:#f92672">==</span> ord(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">q</span><span style="color:#e6db74">&#39;</span>):
+        <span style="color:#66d9ef">break</span>
 
-    if key == ord('q'):
-        break
-
-video.release()
-cv2.destroyAllWindows()
-</code></pre>
-
-<p>このプログラムを実行すると以下のようにウインドウに撮影された画像が表示される．
+video<span style="color:#f92672">.</span>release()
+cv2<span style="color:#f92672">.</span>destroyAllWindows()
+</code></pre></div><p>このプログラムを実行すると以下のようにウインドウに撮影された画像が表示される．
 <code>q</code>キーを叩けば終了する．</p>
-
-<p><img src="camera view.png" alt="camera view" /></p>
-
-<h2 id="映像取得プログラムに色情報抽出-送信処理をくっつける">映像取得プログラムに色情報抽出・送信処理をくっつける</h2>
-
+<p>![camera view](camera view.png)</p>
+<h2 id="heading5">映像取得プログラムに色情報抽出・送信処理をくっつける</h2>
 <p>上記の映像取得プログラムに色情報の抽出処理を加えることを考える．
 画面に映った物体の色をおおまかにとるなら色チャネルごとの平均を求めれば良さそうな気がするが，
 それだけだとテーブルの色に値がひっぱられて綺麗に色をとることができない．
 そこで，画面内の彩度が高い部分のみを取り出すマスクを大津の2値化で作り，
 そのマスクを利用して彩度の高い色の平均を求め，Processing側に送信する．</p>
-
 <p><strong>彩度の高い部分のみの平均を求めて送信するプログラム</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># -*- coding: utf-8 -*-</span>
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+<span style="color:#f92672">from</span> scipy <span style="color:#f92672">import</span> signal
+<span style="color:#f92672">import</span> cv2
+<span style="color:#f92672">from</span> pythonosc <span style="color:#f92672">import</span> udp_client
+<span style="color:#f92672">from</span> pythonosc.osc_message_builder <span style="color:#f92672">import</span> OscMessageBuilder
 
-<pre><code class="language-python"># -*- coding: utf-8 -*-
-import numpy as np
-from scipy import signal
-import cv2
-from pythonosc import udp_client
-from pythonosc.osc_message_builder import OscMessageBuilder
+IP <span style="color:#f92672">=</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">127.0.0.1</span><span style="color:#e6db74">&#39;</span>
+PORT <span style="color:#f92672">=</span> <span style="color:#ae81ff">6700</span>
 
-IP = '127.0.0.1'
-PORT = 6700
+<span style="color:#75715e"># UDPのクライアントを作る</span>
+client <span style="color:#f92672">=</span> udp_client<span style="color:#f92672">.</span>UDPClient(IP, PORT)
 
-# UDPのクライアントを作る
-client = udp_client.UDPClient(IP, PORT)
+video <span style="color:#f92672">=</span> cv2<span style="color:#f92672">.</span>VideoCapture(<span style="color:#ae81ff">0</span>)
 
-video = cv2.VideoCapture(0)
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">send_color</span>(r, g, b):
+    <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#e6db74"> 引数で渡された色をProcessing側に送信する </span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+    msg <span style="color:#f92672">=</span> OscMessageBuilder(address<span style="color:#f92672">=</span><span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">/color</span><span style="color:#e6db74">&#39;</span>)
+    msg<span style="color:#f92672">.</span>add_arg(r)
+    msg<span style="color:#f92672">.</span>add_arg(g)
+    msg<span style="color:#f92672">.</span>add_arg(b)
+    m <span style="color:#f92672">=</span> msg<span style="color:#f92672">.</span>build()
 
-def send_color(r, g, b):
-    &quot;&quot;&quot; 引数で渡された色をProcessing側に送信する &quot;&quot;&quot;
-    msg = OscMessageBuilder(address='/color')
-    msg.add_arg(r)
-    msg.add_arg(g)
-    msg.add_arg(b)
-    m = msg.build()
-
-    print(m.address, m.params)
-    client.send(m)
+    <span style="color:#66d9ef">print</span>(m<span style="color:#f92672">.</span>address, m<span style="color:#f92672">.</span>params)
+    client<span style="color:#f92672">.</span>send(m)
 
 
-cv2.namedWindow('camera view', cv2.WINDOW_NORMAL)
-cv2.namedWindow('foreground', cv2.WINDOW_NORMAL)
+cv2<span style="color:#f92672">.</span>namedWindow(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">camera view</span><span style="color:#e6db74">&#39;</span>, cv2<span style="color:#f92672">.</span>WINDOW_NORMAL)
+cv2<span style="color:#f92672">.</span>namedWindow(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">foreground</span><span style="color:#e6db74">&#39;</span>, cv2<span style="color:#f92672">.</span>WINDOW_NORMAL)
 
-while True:
+<span style="color:#66d9ef">while</span> True:
 
-    ok, frame = video.read()
+    ok, frame <span style="color:#f92672">=</span> video<span style="color:#f92672">.</span>read()
 
-    if not ok:
-        break
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> ok:
+        <span style="color:#66d9ef">break</span>
     
-    # 入力画像をぼかした画像を取得する
-    frame_blur = cv2.GaussianBlur(frame, (25, 25), 11)
-    # ぼかした画像をHSVに変換した画像を取得する
-    hsv = cv2.cvtColor(frame_blur, cv2.COLOR_BGR2HSV)
+    <span style="color:#75715e"># 入力画像をぼかした画像を取得する</span>
+    frame_blur <span style="color:#f92672">=</span> cv2<span style="color:#f92672">.</span>GaussianBlur(frame, (<span style="color:#ae81ff">25</span>, <span style="color:#ae81ff">25</span>), <span style="color:#ae81ff">11</span>)
+    <span style="color:#75715e"># ぼかした画像をHSVに変換した画像を取得する</span>
+    hsv <span style="color:#f92672">=</span> cv2<span style="color:#f92672">.</span>cvtColor(frame_blur, cv2<span style="color:#f92672">.</span>COLOR_BGR2HSV)
     
-    # 彩度の大きい部分のみを2値化で取り出す
-    th, foreground = cv2.threshold(hsv[:, :, 1], 0, 255, cv2.THRESH_OTSU)
-    foreground_flag = (foreground == 255)
+    <span style="color:#75715e"># 彩度の大きい部分のみを2値化で取り出す</span>
+    th, foreground <span style="color:#f92672">=</span> cv2<span style="color:#f92672">.</span>threshold(hsv[:, :, <span style="color:#ae81ff">1</span>], <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">255</span>, cv2<span style="color:#f92672">.</span>THRESH_OTSU)
+    foreground_flag <span style="color:#f92672">=</span> (foreground <span style="color:#f92672">==</span> <span style="color:#ae81ff">255</span>)
     
-    # 色チャネルごとに平均を計算する
-    bgr_mean = frame_blur[foreground_flag].mean(axis=0)
+    <span style="color:#75715e"># 色チャネルごとに平均を計算する</span>
+    bgr_mean <span style="color:#f92672">=</span> frame_blur[foreground_flag]<span style="color:#f92672">.</span>mean(axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
 
-    # 色を送信する（OpenCVの画像はRGBではなくBGRなので注意）
-    b, g, r = map(int, bgr_mean.round())
+    <span style="color:#75715e"># 色を送信する（OpenCVの画像はRGBではなくBGRなので注意）</span>
+    b, g, r <span style="color:#f92672">=</span> map(int, bgr_mean<span style="color:#f92672">.</span>round())
     send_color(r, g, b)
 
-    cv2.imshow('camera view', frame)
-    cv2.imshow('foreground', foreground)
+    cv2<span style="color:#f92672">.</span>imshow(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">camera view</span><span style="color:#e6db74">&#39;</span>, frame)
+    cv2<span style="color:#f92672">.</span>imshow(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">foreground</span><span style="color:#e6db74">&#39;</span>, foreground)
 
-    key = cv2.waitKey(30)
+    key <span style="color:#f92672">=</span> cv2<span style="color:#f92672">.</span>waitKey(<span style="color:#ae81ff">30</span>)
 
-    if key == ord('q'):
-        break
+    <span style="color:#66d9ef">if</span> key <span style="color:#f92672">==</span> ord(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">q</span><span style="color:#e6db74">&#39;</span>):
+        <span style="color:#66d9ef">break</span>
 
-video.release()
-cv2.destroyAllWindows()
-</code></pre>
-
-<p>実行結果は以下の通り．
+video<span style="color:#f92672">.</span>release()
+cv2<span style="color:#f92672">.</span>destroyAllWindows()
+</code></pre></div><p>実行結果は以下の通り．
 左側がProcessingの画面，真ん中がカメラの映像，右側が彩度の高い部分を表すマスク画像である．
 結果から，カメラの映像に入ってきた本の色に応じてProcessing側の画面を変化させることが実現できていることがわかる．</p>
-
-<p><img src="result3.gif" alt="send color 3" /></p>
-
-<h1 id="まとめ">まとめ</h1>
-
+<p><img src="result3.gif" alt="send color 3"></p>
+<h1 id="heading6">まとめ</h1>
 <p>この記事では，PythonとProcessing間の連携を行うために，Open Sound Control (OSC) を用いた処理を実装した．</p>
-
 <p>今回は送受信するデータとして色を扱ったが，もちろんその他のデータをやりとりすることもできる．
 例えば，送信側は座標を送信し，受信側は受信した位置に対して図形を描画する，といった表現も可能であると考えられる．</p></div>
 
@@ -463,7 +405,7 @@ cv2.destroyAllWindows()
 </main>
 
         <footer>
-            <p class="copyright text-muted">&copy; Satoshi Murashige. All rights reserved.</p>
+            <p class="copyright text-muted">© Satoshi Murashige. All rights reserved.</p>
         </footer>
 
         
