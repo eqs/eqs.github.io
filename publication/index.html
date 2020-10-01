@@ -64,7 +64,18 @@
 
 <script src="/js/p5.js" type="text/javascript"></script>
 <script src="/js/p5.min.js" type="text/javascript"></script>
-<script src="/js/mysketch3.js" type="text/javascript"></script>
+<script type="text/javascript">
+function randomlySelectSketch() {
+    var a = 1;
+    var b = 4;
+    var randomIdx = Math.floor(Math.random() * (b - a)) + a;
+    var newScript = document.createElement('script');
+    newScript.type = 'text/javascript';
+    newScript.src = "/js/mysketch" + randomIdx + ".js";
+    document.getElementsByTagName('head')[0].appendChild(newScript);
+}
+randomlySelectSketch();
+</script>
  <meta name="generator" content="Hugo 0.74.1" />
         
 
