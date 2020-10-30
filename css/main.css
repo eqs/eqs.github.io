@@ -116,3 +116,11 @@ canvas.backgroundsketch {
     font-weight: bold;
     border-bottom: 1px solid #000000;
 }
+
+.pub-reviewed {
+    font-weight: bold;
+}
+
+.pub-award {
+    font-weight: bold;
+}
