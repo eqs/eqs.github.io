@@ -124,3 +124,30 @@ canvas.backgroundsketch {
 .pub-award {
     font-weight: bold;
 }
+
+/* Formspree */
+
+#fs-frm label, #fs-frm ::placeholder {
+    display  : flex;
+    font-weight: 500;
+    padding-top: .2rem;
+    margin-bottom: .5rem;
+    align-items: baseline:
+}
+
+#fs-frm input, #fs-frm textarea {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    display: block;
+    margin: 0;
+    margin-bottom: 1.5rem;
+    padding: .75em 1.25rem;
+    width: 100%;
+}
+
+#fs-frm [type="submit"], #fs-frm [type="reset"] {
+    width: auto;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: .75em 1.25rem;
+}

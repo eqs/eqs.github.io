@@ -153,8 +153,22 @@ randomlySelectSketch();
 
     </div>
 
-    <br> <div class="text-justify"><p>murashige.satoshi.mi1＊is.naist.jp (＊→@)</p>
-<p>(NAISTの受験に関する相談は大学または研究室の方へお願いします)</p>
+    <br> <div class="text-justify"><p>NAISTの受験に関する相談は大学または研究室の方へお願いします．</p>
+
+<form id="fs-frm" name="simple-contact-form" accept-charset="utf-8" action="https://formspree.io/f/mjvjvkka" method="post">
+  <fieldset id="fs-frm-inputs">
+    <label for="full-name">Full Name</label>
+    <input type="text" name="name" id="full-name" placeholder="First and Last" required="">
+    <label for="email-address">Email Address</label>
+    <input type="email" name="_replyto" id="email-address" placeholder="email@domain.tld" required="">
+    <label for="message">Message</label>
+    <textarea rows="5" name="message" id="message" placeholder="..." required=""></textarea>
+    <input type="hidden" name="_subject" id="email-subject" value="Contact Form Submission">
+  </fieldset>
+  <input type="submit" value="Submit">
+</form>
+
+
 </div>
 
 </main>
