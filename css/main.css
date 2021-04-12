@@ -184,3 +184,35 @@ canvas.backgroundsketch {
     background-color: rgba(255, 255, 255, 0.9);
     padding: .75em 1.25rem;
 }
+
+/* alert box */
+
+.alert-box {
+    margin: 1.56em 0;
+    background-color: rgba(238, 238, 238, 0.9);
+    box-shadow: 0 .2rem .5rem rgba(0, 0, 0, .4), 0 0 .05rem rgba(0, 0, 0, .8);
+}
+
+p.alert-box-title {
+    padding: .8rem 1.2rem .8rem 1.6rem;
+    font-weight: bold;
+}
+
+.alert-box > *{
+    margin: .4em 0 .4em 0;
+    padding: .4em 1.2em .4em;
+}
+
+.alert-box > ul{
+    margin: .2em 0 .2em 2em;
+}
+
+.alert-box.tip > p.alert-box-title {
+    border-left: .8rem solid #00B4E6;
+    background-color: #D3E6EB;
+}
+
+.alert-box.warning > p.alert-box-title {
+    border-left: .8rem solid #D16600;
+    background-color: #EBC5A2;
+}

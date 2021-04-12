@@ -19,7 +19,7 @@
       <description>About  研究室内の輪講用に作成したBeamerのテンプレート 数式の意味を説明するためのアニメーションを直感的に記述できるLaTeXコマンド highlightcap を実装 Overleafで動作確認済み  Link  Repository: https://github.com/eqs/beamer-math-template Speaker Deck: https://speakerdeck.com/eqs/beamer-example  Detail テンプレートを作ったモチベーション  PRMLのような数式がかなり多いテキストの輪講では，Power Pointで資料を作るのが超面倒くさい  Keynoteもインライン数式が書けないので結構だるい   一方，Beamerだとレイアウトの自由度が下がるため，視覚的にわかりやすいスライドを書くのが面倒くさい 数式を記述しやすいLaTeXを使用しつつ最小限の手間で説明用のアニメーションを付与できるコマンドが欲しくてこのようなテンプレを作った  highlight系コマンドの使い方 例えば，方程式の変形の説明において，一部の項にだけ赤色の背景をつけたい場合は 次のように記述すればよい：
 \begin{align*} &amp;amp;x^2 - 6x + 2 \\ &amp;amp;= \highlight[red]{x^2 - 6x + 9} - 7 \\ &amp;amp;= \highlight[red]{(x - 3)^2} - 7 \end{align*} 実行結果は次のようになる：
 装飾無しの数式を一旦見せてから次のアニメーションで背景をつけたい場合は以下のように &amp;lt;2-&amp;gt; をつければよい．
-\begin{align*} &amp;amp;x^2 - 6x + 2 \\ &amp;amp;= \highlight&amp;lt;2-&amp;gt;[red]{x^2 - 6x + 9} - 7 \\ &amp;amp;= \highlight&amp;lt;2-&amp;gt;[red]{(x - 3)^2} - 7 \end{align*} このような&amp;lt;&amp;gt;を用いる記法は Overlay Specification と呼ばれる． これについては以下のページの解説がかなりわかりやすい．</description>
+\begin{align*} &amp;amp;x^2 - 6x + 2 \\ &amp;amp;= \highlight&amp;lt;2-&amp;gt;[red]{x^2 - 6x + 9} - 7 \\ &amp;amp;= \highlight&amp;lt;2-&amp;gt;[red]{(x - 3)^2} - 7 \end{align*}  Overlay Specification このような&amp;lt;&amp;gt;を用いる記法は Overlay Specification と呼ばれる． これについては以下のページの解説がかなりわかりやすい．</description>
     </item>
     
     <item>
